@@ -1,0 +1,1 @@
+{"max_ttl_seconds":300,"rules":[{"actions":["read"],"agent":"data-analyst","max_ttl_seconds":300,"name":"data analyst reads the warehouse","resource":"warehouse/*","tool":"warehouse.query"},{"actions":["read"],"agent":"support-bot","max_ttl_seconds":60,"name":"support bot reads tickets, one shot each","resource":"tickets/*","single_use":true,"tool":"tickets.lookup"}]}

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-scopes"
+version = "0.1.0"
+description = "Short-lived scoped credentials for AI agents: a tool call gets a credential for that tool, that resource, and five minutes, then it dies."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Anusha Mukka" }]
+keywords = ["ai-agents", "credentials", "least-privilege", "iam", "security", "vault", "authorization"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+lint = ["ruff>=0.4"]
+yaml = ["pyyaml>=6"]
+
+[project.scripts]
+agent-scopes = "agent_scopes.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/anushamukka9/agent-scopes"
+Issues = "https://github.com/anushamukka9/agent-scopes/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_scopes"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
