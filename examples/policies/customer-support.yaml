@@ -1,0 +1,57 @@
+# Customer support with PII masking.
+#
+# The split of responsibilities matters here, so let me state it
+# plainly: agent-scopes decides which tools the support bot may reach
+# and for how long. The masking happens inside the tools. tickets.lookup
+# must return masked PII (last four of the phone number, redacted email
+# local part) at the tool layer. Policy keeps the bot away from every
+# tool that returns raw PII or moves money; the tools themselves keep
+# the fields they do return safe to show.
+#
+# Every sensitive rule here is single-use with a short TTL. A leaked
+# ticket token buys an attacker one lookup and about a minute.
+
+max_ttl_seconds: 300
+
+rules:
+  - name: "support looks up tickets, one shot each"
+    agent: "support-bot"
+    tool: "tickets.lookup"
+    resource: "tickets/*"
+    actions: ["read"]
+    max_ttl_seconds: 60
+    single_use: true
+
+  - name: "support searches the knowledge base"
+    agent: "support-bot"
+    tool: "kb.search"
+    resource: "kb/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+  - name: "support quotes a refund, never issues one"
+    agent: "support-bot"
+    tool: "refunds.quote"
+    resource: "refunds/*"
+    actions: ["read"]
+    max_ttl_seconds: 120
+
+  - name: "support reads order status"
+    agent: "support-bot"
+    tool: "orders.status"
+    resource: "orders/*"
+    actions: ["read"]
+    max_ttl_seconds: 120
+    single_use: true
+
+# Deliberately absent, and why:
+# - crm.customers / crm.export: the raw customer record store. The
+#   support bot has no business there. If a ticket lookup needs a
+#   field, add it masked to tickets.lookup instead of opening this door.
+# - billing.charge / refunds.issue: moving money is human-only in this
+#   pack. refunds.quote lets the bot tell the customer what is possible;
+#   a person clicks the button.
+# - tickets.reply: sending replies under your brand gets its own rule
+#   (single_use, short TTL) and usually an approval step like the
+#   deploy-bot pack. It is not here because reply policies deserve
+#   their own review, not a line item.

@@ -1,0 +1,68 @@
+# Deploy bot with approval.
+#
+# The pattern: the bot can look at everything (CI status, artifacts,
+# dry-run plans) for free, but the one dangerous action, actually
+# deploying, is a single-use lease on staging only, good for sixty
+# seconds. Your harness issues that lease only after a human approves
+# the plan. The approval lives in the harness; agent-scopes makes the
+# resulting credential one-shot and short so an approved token cannot
+# be replayed, shared, or linger.
+#
+# Production deploys are intentionally not in this pack. In my setup
+# prod deploys are issued from a separate policy that only the
+# release manager's harness holds. Two policies, two blast radii.
+
+max_ttl_seconds: 300
+
+rules:
+  - name: "bot reads CI status"
+    agent: "deploy-bot"
+    tool: "ci.status"
+    resource: "ci/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+  - name: "bot downloads build artifacts"
+    agent: "deploy-bot"
+    tool: "artifacts.download"
+    resource: "artifacts/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+  - name: "bot dry-runs a release plan (read only)"
+    agent: "deploy-bot"
+    tool: "releases.plan"
+    resource: "releases/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+  - name: "bot deploys to staging: one shot, one minute"
+    agent: "deploy-bot"
+    tool: "releases.deploy"
+    resource: "releases/staging/*"
+    actions: ["deploy"]
+    max_ttl_seconds: 60
+    single_use: true
+
+  - name: "bot rolls back staging: one shot, one minute"
+    agent: "deploy-bot"
+    tool: "releases.rollback"
+    resource: "releases/staging/*"
+    actions: ["deploy"]
+    max_ttl_seconds: 60
+    single_use: true
+
+# The approval flow this pack assumes, in plain steps:
+# 1. Bot calls releases.plan. The harness shows the plan to a human.
+# 2. Human approves. Only then does the harness call broker.issue for
+#    releases.deploy on releases/staging/<release>. Refusals and
+#    timeouts mean no lease is ever minted.
+# 3. The gateway redeems the token inside the deploy call. After one
+#    redeem the lease is dead; after sixty seconds it is dead anyway.
+#
+# Deliberately absent, and why:
+# - releases.deploy on releases/prod/*: production is a separate
+#   policy held by a separate harness. Same shape, different hands.
+# - releases.delete / releases.promote: destructive or
+#   privilege-escalating actions get their own explicit rules when
+#   you actually need them, never a glob you will regret.

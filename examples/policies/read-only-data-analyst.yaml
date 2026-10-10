@@ -1,0 +1,45 @@
+# Read-only data analyst.
+#
+# The shape I reach for first: an analyst agent that can read everything
+# it needs and write nothing at all. Deny by default does the heavy
+# lifting here. There is no rule for warehouse.write, etl.trigger, or
+# warehouse.admin, so a request for any of them gets a PolicyDenied at
+# issue time, before any secret moves. You do not need a deny rule for
+# what you simply never allow.
+#
+# Copy this file, rename the agent, and tighten the resource globs to
+# your warehouse names. That is the whole adoption story.
+
+max_ttl_seconds: 300
+
+rules:
+  - name: "analyst queries the warehouse (read only)"
+    agent: "data-analyst"
+    tool: "warehouse.query"
+    resource: "warehouse/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+  - name: "analyst reads saved query history"
+    agent: "data-analyst"
+    tool: "warehouse.history"
+    resource: "warehouse/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+  - name: "analyst reads its own export area"
+    agent: "data-analyst"
+    tool: "exports.read"
+    resource: "exports/analyst/*"
+    actions: ["read"]
+    max_ttl_seconds: 300
+
+# Deliberately absent, and why:
+# - warehouse.write / warehouse.admin: analysts do not get write
+#   credentials. If a pipeline needs the analyst's output, a separate
+#   loader agent with its own narrow rule does the writing.
+# - etl.trigger: kicking off a pipeline is a write against shared
+#   compute. It gets its own agent identity and its own approval
+#   step, not a side door in the analyst policy.
+# - exports/* outside exports/analyst/*: the analyst reads exports
+#   only from its own sandbox prefix, never the shared buckets.

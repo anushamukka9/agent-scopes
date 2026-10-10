@@ -61,6 +61,15 @@ moved inside the tool call. See [docs/quickstart.md](docs/quickstart.md),
 [examples/quickstart.py](examples/quickstart.py), and
 [examples/example_policy.json](examples/example_policy.json).
 
+## Policy packs
+
+Copy-paste starting points for the roles I keep writing by hand: a
+read-only data analyst, a deploy bot whose staging deploys need a
+human-approved one-shot lease, and a customer-support bot that stays
+away from raw PII and money movement. Each pack names what it
+deliberately leaves out and why. See
+[examples/policies/](examples/policies/).
+
 ## What it does
 
 **Scoped leases.** One lease binds one agent, one tool, one concrete
