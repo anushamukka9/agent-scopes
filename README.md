@@ -61,6 +61,14 @@ moved inside the tool call. See [docs/quickstart.md](docs/quickstart.md),
 [examples/quickstart.py](examples/quickstart.py), and
 [examples/example_policy.json](examples/example_policy.json).
 
+## Token broker demo
+
+The demo from my talk, as code: a support bot gets one task, the
+broker mints a separate five-minute credential for each step, and
+everything outside the task is refused before any secret moves.
+Run `python examples/token_broker_demo.py`, or read the walkthrough
+in [docs/token-broker-demo.md](docs/token-broker-demo.md).
+
 ## Policy packs
 
 Copy-paste starting points for the roles I keep writing by hand: a
