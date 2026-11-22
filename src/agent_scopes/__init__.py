@@ -25,7 +25,7 @@ from agent_scopes.broker import (
 from agent_scopes.policy import Policy, PolicyError, PolicyRule
 from agent_scopes.store import LeaseStore
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "AgentScopesError",

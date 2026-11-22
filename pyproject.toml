@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agent-scopes"
-version = "0.1.0"
+version = "0.2.0"
 description = "Short-lived scoped credentials for AI agents: a tool call gets a credential for that tool, that resource, and five minutes, then it dies."
 readme = "README.md"
 license = { text = "MIT" }
